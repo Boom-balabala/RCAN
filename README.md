@@ -5,7 +5,7 @@
 
 修改RCAN/RCAN_TrainCode/code/trainer.py 	47~55行
 
-修改batch_size=64
+修改batch_size=256
 
 修改class DIV2K self.repeat = args.test_every * 16 // args.batch_size
 
