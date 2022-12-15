@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 import scipy.misc as misc
-
+import imageio
 import torch
 import torch.optim as optim
 import torch.optim.lr_scheduler as lrs
@@ -48,9 +48,9 @@ class checkpoint():
         if args.load == '.':
             # file name to save,default='test'
             if args.save == '.': args.save = now
-            self.dir = '../experiment/' + args.save
+            self.dir = '/root/RCAN_test/RCAN_TrainCode/experiment/' + args.save
         else:
-            self.dir = '../experiment/' + args.load
+            self.dir = '/root/RCAN_test/RCAN_TrainCode/experiment/' + args.load
             if not os.path.exists(self.dir):
                 args.load = '.'
             else:
@@ -77,6 +77,7 @@ class checkpoint():
             f.write('\n')
 
     def save(self, trainer, epoch, is_best=False):
+        # '/root/RCAN_test/RCAN_TrainCode/experiment/test'
         trainer.model.save(self.dir, epoch, is_best=is_best)
         trainer.loss.save(self.dir)
         trainer.loss.plot_loss(self.dir, epoch)
@@ -125,7 +126,7 @@ class checkpoint():
         for v, p in zip(save_list, postfix):
             normalized = v[0].data.mul(255 / self.args.rgb_range)
             ndarr = normalized.byte().permute(1, 2, 0).cpu().numpy()
-            misc.imsave('{}{}.png'.format(filename, p), ndarr)
+            imageio.imwrite('{}{}.png'.format(filename, p), ndarr)
 
 def quantize(img, rgb_range):
     pixel_range = 255 / rgb_range

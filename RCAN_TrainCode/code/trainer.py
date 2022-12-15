@@ -33,17 +33,17 @@ class Trainer():
         self.error_last = 1e8
 
     def train(self):
-        # self.scheduler.step()
+        
         self.loss.step()
-        epoch = self.scheduler.last_epoch + 1
-        lr = self.scheduler.get_lr()[0]
-
+        epoch = self.scheduler.last_epoch 
+        self.scheduler.step()
+        # 这里self.scheduler.last_epoch=1
+        lr = self.scheduler.get_last_lr()[0]
         self.ckp.write_log(
             '[Epoch {}]\tLearning rate: {:.2e}'.format(epoch, Decimal(lr))
         )
         self.loss.start_log()
         self.model.train()
-        
         timer_data, timer_model = utility.timer(), utility.timer()
         scaler = torch.cuda.amp.GradScaler()
         for batch, (lr, hr, _, idx_scale) in enumerate(self.loader_train):
@@ -53,9 +53,9 @@ class Trainer():
             with torch.autocast(device_type='cuda', dtype=torch.float16):
                 sr = self.model(lr, idx_scale)
                 loss = self.loss(sr, hr)
-            
             # args.skip_threshold：skipping batch that has large error
             # self.error_last = 1e8
+            
             if loss.item() < self.args.skip_threshold * self.error_last:
                 scaler.scale(loss).backward()
                 scaler.step(self.optimizer)
@@ -65,7 +65,7 @@ class Trainer():
                     batch + 1, loss.item()
                 ))
             self.optimizer.zero_grad()
-            self.scheduler.step()
+            
             timer_model.hold()
             if (batch + 1) % self.args.print_every == 0:
                 self.ckp.write_log('[{}/{}]\t{}\t{:.1f}+{:.1f}s'.format(
@@ -76,42 +76,13 @@ class Trainer():
                     timer_data.release()))
 
             timer_data.tic()
-        '''
-        for batch, (lr, hr, _, idx_scale) in enumerate(self.loader_train):
-            lr, hr = self.prepare([lr, hr])
-            timer_data.hold()  # hold：self.acc += self.toc()
-            timer_model.tic()  # tic：是当前时间
-
-            self.optimizer.zero_grad()
-            sr = self.model(lr, idx_scale)
-            loss = self.loss(sr, hr)
-        '''
-        '''
-        官方代码
-        [Epoch 1]       Learning rate: 1.00e-4
-        [1600/16000]    [L1: 21.6380]   93.3+1.1s
-        [3200/16000]    [L1: 16.8315]   85.3+0.5s
-        [4800/16000]    [L1: 14.7276]   85.7+0.5s
-        '''
-        '''
-        修改后
-        RuntimeError: Pin memory thread exited unexpectedly
-        修改代码：kwargs['pin_memory'] = False，报错消失
-        运行结果如下：
-        [Epoch 1]       Learning rate: 1.00e-4
-        [1600/16000]    [L1: 22.7962]   105.3+1.5s
-        [3200/16000]    [L1: 17.4339]   91.3+0.4s
-        '''
-        '''
-        warnings.warn("Detected call of `lr_scheduler.step()` before `optimizer.step()`. "
-        '''
-        
-        
         self.loss.end_log(len(self.loader_train))# loss：self.log[-1].div_(n_batches)
         self.error_last = self.loss.log[-1, -1]
 
+        
+
     def test(self):
-        epoch = self.scheduler.last_epoch + 1
+        epoch = self.scheduler.last_epoch
         self.ckp.write_log('\nEvaluation:')
         self.ckp.add_log(torch.zeros(1, len(self.scale)))
         self.model.eval()
@@ -123,7 +94,7 @@ class Trainer():
                 self.loader_test.dataset.set_scale(idx_scale)
                 tqdm_test = tqdm(self.loader_test, ncols=80)
                 for idx_img, (lr, hr, filename, _) in enumerate(tqdm_test):
-                    filename = filename[0]
+                    filename = filename[0] #0049
                     no_eval = (hr.nelement() == 1)
                     if not no_eval:
                         lr, hr = self.prepare([lr, hr])

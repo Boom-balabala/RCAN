@@ -29,7 +29,7 @@ class Model(nn.Module):
             self.model = nn.DataParallel(self.model, range(args.n_GPUs))
 
         self.load(
-            ckp.dir,# '../experiment/test'这里需要改一下位置，默认，放在了桌面是为什么？
+            ckp.dir,
             # 'pre-trained model directory'
             pre_train=args.pre_train,
             # resume from specific checkpoint

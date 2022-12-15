@@ -9,11 +9,11 @@ parser.add_argument('--template', default='.',
                     help='You can set various templates in option.py')
 
 # Hardware specifications
-parser.add_argument('--n_threads', type=int, default=16,
+parser.add_argument('--n_threads', type=int, default=12,
                     help='number of threads for data loading')
 parser.add_argument('--cpu', action='store_true',
                     help='use cpu only')
-parser.add_argument('--n_GPUs', type=int, default=4,
+parser.add_argument('--n_GPUs', type=int, default=1,
                     help='number of GPUs')
 parser.add_argument('--seed', type=int, default=1,
                     help='random seed')
@@ -25,18 +25,18 @@ parser.add_argument('--dir_demo', type=str, default='../test',
                     help='demo image directory')
 # 训练集名字 args.data_test in ['Set5', 'Set14', 'B100', 'Urban100']
 # 不在则运行 RCAN-master\RCAN_TrainCode\code\data\__init__.py 44行
-parser.add_argument('--data_train', type=str, default='DIV2K',
+parser.add_argument('--data_train', type=str, default='AMOS',
                     help='train dataset name')
-parser.add_argument('--data_test', type=str, default='DIV2K',
+parser.add_argument('--data_test', type=str, default='AMOS',
                     help='test dataset name')
 parser.add_argument('--benchmark_noise', action='store_true',
                     help='use noisy benchmark sets')
-parser.add_argument('--n_train', type=int, default=800,
+parser.add_argument('--n_train', type=int, default=48,
                     help='number of training set')
 parser.add_argument('--n_val', type=int, default=5,
                     help='number of validation set')
 # 800
-parser.add_argument('--offset_val', type=int, default=800,
+parser.add_argument('--offset_val', type=int, default=48,
                     help='validation index offest')
 parser.add_argument('--ext', type=str, default='sep_reset',
                     help='dataset file extension')
@@ -53,6 +53,8 @@ parser.add_argument('--n_colors', type=int, default=3,
 # 高斯噪声
 parser.add_argument('--noise', type=str, default='.',
                     help='Gaussian noise std.')
+
+
 parser.add_argument('--chop', action='store_true',
                     help='enable memory-efficient forward')
 
@@ -80,11 +82,15 @@ parser.add_argument('--precision', type=str, default='single',
                     help='FP precision for test (single | half)')
 
 # Training specifications
+
 parser.add_argument('--reset', action='store_true',
                     help='reset the training')
-parser.add_argument('--test_every', type=int, default=1000,
+
+'''
+parser.add_argument('--test_every', type=int, default=20,
                     help='do test per every N batches')
-parser.add_argument('--epochs', type=int, default=1000,
+'''
+parser.add_argument('--epochs', type=int, default=5,
                     help='number of epochs to train')
 parser.add_argument('--batch_size', type=int, default=64,
                     help='input batch size for training')
@@ -100,7 +106,7 @@ parser.add_argument('--gan_k', type=int, default=1,
 # Optimization specifications
 parser.add_argument('--lr', type=float, default=1e-4,
                     help='learning rate')
-parser.add_argument('--lr_decay', type=int, default=200,
+parser.add_argument('--lr_decay', type=int, default=1,
                     help='learning rate decay per N epochs')
 parser.add_argument('--decay_type', type=str, default='step',
                     help='learning rate decay type')
@@ -128,21 +134,30 @@ parser.add_argument('--skip_threshold', type=float, default='1e6',
                     help='skipping batch that has large error')
 
 # Log specifications
+# 指定一个保存结果的文件夹的名称，如RCAN_BIX2_G10R20P48
 parser.add_argument('--save', type=str, default='test',
                     help='file name to save')
 parser.add_argument('--load', type=str, default='.',
                     help='file name to load')
 parser.add_argument('--resume', type=int, default=0,
                     help='resume from specific checkpoint')
+
+
 parser.add_argument('--print_model', action='store_true',
                     help='print model')
+
 parser.add_argument('--save_models', action='store_true',
                     help='save all intermediate models')
-parser.add_argument('--print_every', type=int, default=100,
+
+
+parser.add_argument('--print_every', type=int, default=1,
                     help='how many batches to wait before logging training status')
 # 是否保存原图生成的低分辨率图像、学习出的图像、原图
+
+
 parser.add_argument('--save_results', action='store_true',
                     help='save output results')
+
 
 # options for residual group and feature channel reduction
 parser.add_argument('--n_resgroups', type=int, default=10,
